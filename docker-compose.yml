@@ -1,0 +1,64 @@
+version: '3'
+
+services:
+
+  rabbitmq1:
+    image: rabbitmq:3-management
+    user: rabbitmq
+    hostname: rabbitmq1
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_DEFAULT_VHOST}
+      - RABBITMQ_LOGS=${RABBITMQ_LOGS}
+    ports:
+#      - 5671:5671
+#      - 4379:4369
+#      - 25671:15671
+      - 25672:15672
+#      - 5681:5671
+#      - 5682:5672
+#      - 15682:15672
+
+    volumes:
+      - rabbit1data:/var/lib/rabbitmq
+      - ./.erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
+    networks:
+      - rabbitmq
+
+  rabbitmq2:
+    image: rabbitmq:3-management
+    hostname: rabbitmq2
+    depends_on:
+      - rabbitmq1
+#    ports:
+#      - 15673:15671
+    volumes:
+      - rabbit2data:/var/lib/rabbitmq
+      - ./cluster-entrypoint.sh:/usr/local/bin/cluster-entrypoint.sh
+      - ./.erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
+    entrypoint: /usr/local/bin/cluster-entrypoint.sh
+    networks:
+      - rabbitmq
+
+  rabbitmq3:
+    image: rabbitmq:3-management
+    hostname: rabbitmq3
+    depends_on:
+      - rabbitmq1
+#    ports:
+#      - 15674:15671
+    volumes:
+      - rabbit3data:/var/lib/rabbitmq
+      - ./cluster-entrypoint.sh:/usr/local/bin/cluster-entrypoint.sh
+      - ./.erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
+    entrypoint: /usr/local/bin/cluster-entrypoint.sh
+    networks:
+      - rabbitmq
+
+networks:
+    rabbitmq:
+volumes:
+    rabbit1data:
+    rabbit2data:
+    rabbit3data:
